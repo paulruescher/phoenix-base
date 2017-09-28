@@ -6,9 +6,13 @@ defmodule App.Mixfile do
       app: :app,
       version: "0.0.1",
       elixir: "~> 1.4",
-      elixirc_paths: elixirc_paths(Mix.env),
+
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      elixirc_paths: elixirc_paths(Mix.env),
+      preferred_cli_env: [espec: :test],
+
       start_permanent: Mix.env == :prod,
+
       aliases: aliases(),
       deps: deps()
     ]
@@ -40,7 +44,30 @@ defmodule App.Mixfile do
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"}
+      {:cowboy, "~> 1.0"},
+      {:httpoison, "~> 0.13"},
+      {:ja_serializer, "~> 0.12.0"},
+
+      # Auth
+      {:facebook, "~> 0.9"},
+      {:extwitter, "~> 0.8"},
+      {:oauth2, "~> 0.9"},
+      {:guardian, "~> 1.0-beta"},
+      {:comeonin, "~> 4.0"},
+      {:bcrypt_elixir, "~> 0.12"},
+
+      # Quality
+      {:credo,    "~> 0.8", only: [:dev, :test]},
+
+      # Testing
+     ## Tests
+      {:espec,         "~> 1.2", only: :test},
+      {:espec_phoenix, "~> 0.6", only: :test},
+      {:espec_phoenix_helpers, "~> 0.3", only: :test},
+
+      {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
+      {:ex_machina,  "~> 2.0"},
+      {:faker, "~> 0.7"}
     ]
   end
 
@@ -52,9 +79,26 @@ defmodule App.Mixfile do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
+      "ecto.seed": "run priv/repo/seeds.exs",
+      "ecto.setup": [
+        "ecto.create",
+        "ecto.migrate",
+        "ecto.seed"
+      ],
+      "ecto.reset": [
+        "ecto.drop",
+        "ecto.setup"
+      ],
+      "test": [
+        "ecto.create --quiet",
+        "ecto.migrate",
+        "test"
+      ],
+      "quality": [
+        "test",
+        "espec --exclude=context_tag:external_services",
+        "credo --strict"
+      ]
     ]
   end
 end

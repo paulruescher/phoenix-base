@@ -13,9 +13,16 @@ config :app,
 config :app, AppWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "t3kMCGYnD8oO4mdgJuDJAOv+P3v4kb8VwAx1vEK55mQf1kbhyBVPQpd1L8VEFD5k",
-  render_errors: [view: AppWeb.ErrorView, accepts: ~w(html json)],
+  render_errors: [view: AppWeb.ErrorView, accepts: ~w(html json json-api)],
   pubsub: [name: App.PubSub,
            adapter: Phoenix.PubSub.PG2]
+
+config :phoenix, :format_encoders,
+  "json-api": Poison
+
+config :mime, :types, %{
+  "application/vnd.api+json" => ["json-api"]
+}
 
 # Configures Elixir's Logger
 config :logger, :console,

@@ -1,5 +1,9 @@
 defmodule App.Application do
+  @moduledoc """
+  Application
+  """
   use Application
+  alias AppWeb.Endpoint
 
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
@@ -12,7 +16,8 @@ defmodule App.Application do
       supervisor(App.Repo, []),
       # Start the endpoint when the application starts
       supervisor(AppWeb.Endpoint, []),
-      # Start your own worker by calling: App.Worker.start_link(arg1, arg2, arg3)
+      # Start your own worker by calling: App.Worker.start_link(arg1, arg2,
+      # arg3)
       # worker(App.Worker, [arg1, arg2, arg3]),
     ]
 
@@ -25,7 +30,7 @@ defmodule App.Application do
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    AppWeb.Endpoint.config_change(changed, removed)
+    Endpoint.config_change(changed, removed)
     :ok
   end
 end

@@ -10,7 +10,9 @@ defmodule AppWeb.Router do
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug :accepts, ["json-api"]
+    plug JaSerializer.ContentTypeNegotiation
+    plug JaSerializer.Deserializer
   end
 
   scope "/", AppWeb do
@@ -19,8 +21,9 @@ defmodule AppWeb.Router do
     get "/", PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", AppWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", AppWeb do
+    pipe_through :api
+
+    resources "/users", UserController
+  end
 end
