@@ -46,11 +46,11 @@ defmodule App.Accounts.User do
     user
     |> changeset(attrs)
     |> cast(attrs, [:password])
-    |> put_pass_hash
+    |> put_password_hash()
     |> validate_required([:password_hash])
   end
 
-  defp put_pass_hash(changeset) do
+  defp put_password_hash(changeset) do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         put_change(changeset, :password_hash, Bcrypt.hashpwsalt(pass))

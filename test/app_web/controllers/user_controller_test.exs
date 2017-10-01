@@ -1,25 +1,17 @@
 defmodule AppWeb.UserControllerTest do
   use AppWeb.ConnCase
-
   alias App.Accounts
   alias App.Accounts.User
 
-  @create_attrs %{email: "some email"}
+  @moduletag :json_api
+
+  @create_attrs %{email: "some email", password: "password"}
   @update_attrs %{email: "some updated email"}
   @invalid_attrs %{email: nil}
 
   def fixture(:user) do
     {:ok, user} = Accounts.create_user(@create_attrs)
     user
-  end
-
-  setup %{conn: conn} do
-    conn =
-      conn
-      |> put_req_header("accept", "application/vnd.api+json")
-      |> put_req_header("content-type", "application/vnd.api+json")
-
-    {:ok, conn: conn}
   end
 
   describe "index" do
@@ -58,6 +50,7 @@ defmodule AppWeb.UserControllerTest do
         "email" => "some updated email"}
     end
 
+    @tag :must_exec
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put conn, user_path(conn, :update, user), user: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}

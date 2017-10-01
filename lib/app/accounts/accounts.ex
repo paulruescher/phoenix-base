@@ -4,8 +4,8 @@ defmodule App.Accounts do
   """
 
   import Ecto.Query, warn: false
+  alias Comeonin.Bcrypt
   alias App.Repo
-
   alias App.Accounts.User
 
   @doc """
@@ -38,6 +38,22 @@ defmodule App.Accounts do
   def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
+  Gets a single user by clause
+
+  Raises `Ecto.NoResultsError` if the User does not exist.
+
+  ## Examples
+
+      iex> get_by!(email: "existing.user@email.com")
+      %User{}
+
+      iex> get_by!(email: "non.existent.user@email.com")
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_by!(clause), do: Repo.get_by!(User, clause)
+
+  @doc """
   Creates a user.
 
   ## Examples
@@ -51,7 +67,7 @@ defmodule App.Accounts do
   """
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.create_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -100,5 +116,24 @@ defmodule App.Accounts do
   """
   def change_user(%User{} = user) do
     User.changeset(user, %{})
+  end
+
+  @doc """
+  Returns
+
+  ## Examples
+
+      iex> change_user(user)
+      %Ecto.Changeset{source: %User{}}
+
+  """
+  def authenticate_user(email, password) do
+    with user <- get_by!(%{email: email}),
+         true <- verify_password(password, user.password_hash),
+         do: {:ok, user}
+  end
+
+  defp verify_password(password, password_hash) do
+    Bcrypt.checkpw(password, password_hash)
   end
 end

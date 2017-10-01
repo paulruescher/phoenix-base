@@ -26,13 +26,22 @@ defmodule AppWeb.ConnCase do
     end
   end
 
-
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(App.Repo)
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(App.Repo, {:shared, self()})
     end
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+
+    conn = Phoenix.ConnTest.build_conn()
+    |> put_accept_header(tags[:json_api])
+
+    {:ok, conn: conn}
   end
 
+  defp put_accept_header(conn, nil), do: conn
+  defp put_accept_header(conn, _) do
+    conn
+    |> Plug.Conn.put_req_header("accept", "application/vnd.api+json")
+    |> Plug.Conn.put_req_header("content-type", "application/vnd.api+json")
+  end
 end

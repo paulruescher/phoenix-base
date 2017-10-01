@@ -47,6 +47,7 @@ defmodule App.Mixfile do
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.13"},
       {:ja_serializer, "~> 0.12.0"},
+      {:apex,        "~> 0.7"},
 
       # Auth
       {:facebook, "~> 0.9"},
@@ -60,7 +61,6 @@ defmodule App.Mixfile do
       {:credo,    "~> 0.8", only: [:dev, :test]},
 
       # Testing
-     ## Tests
       {:espec,         "~> 1.2", only: :test},
       {:espec_phoenix, "~> 0.6", only: :test},
       {:espec_phoenix_helpers, "~> 0.3", only: :test},

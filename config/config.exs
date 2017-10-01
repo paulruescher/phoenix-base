@@ -24,6 +24,10 @@ config :mime, :types, %{
   "application/vnd.api+json" => ["json-api"]
 }
 
+config :app, App.Guardian,
+  issuer: "app",
+  secret_key: "6v95qhiGFTmGcVPrNIizcrdYSKVeGArt7SSs/CJlL7ejQRKwMBe5nb88RQbZWvdN"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

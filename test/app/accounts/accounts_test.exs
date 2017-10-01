@@ -16,7 +16,7 @@ defmodule App.AccountsTest do
         |> Enum.into(@valid_create_attrs)
         |> Accounts.create_user()
 
-      user
+      Map.put(user, :password, nil)
     end
 
     test "list_users/0 returns all users" do
@@ -60,6 +60,16 @@ defmodule App.AccountsTest do
     test "change_user/1 returns a user changeset" do
       user = user_fixture()
       assert %Ecto.Changeset{} = Accounts.change_user(user)
+    end
+
+    test "authenticate_user/1 with valid logins return user" do
+      user = user_fixture()
+      assert {:ok, %User{}} = Accounts.authenticate_user(user.email, "password")
+    end
+
+    test "authenticate_user/1 with invalid logins return error" do
+      user = user_fixture()
+      assert false == Accounts.authenticate_user(user.email, "wrong_password")
     end
   end
 end

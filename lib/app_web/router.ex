@@ -10,9 +10,18 @@ defmodule AppWeb.Router do
   end
 
   pipeline :api do
-    plug :accepts, ["json-api"]
     plug JaSerializer.ContentTypeNegotiation
     plug JaSerializer.Deserializer
+  end
+
+  pipeline :authorized do
+    plug Guardian.Plug.Pipeline,
+      module: App.Guardian,
+      error_handler: App.AuthErrorHandler
+
+    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
+    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
   end
 
   scope "/", AppWeb do
@@ -24,6 +33,12 @@ defmodule AppWeb.Router do
   scope "/api", AppWeb do
     pipe_through :api
 
-    resources "/users", UserController
+    post "/login", SessionController, :create
+
+    scope "/" do
+      # pipe_through :authorized
+
+      resources "/users", UserController
+    end
   end
 end
