@@ -119,21 +119,29 @@ defmodule App.Accounts do
   end
 
   @doc """
-  Returns
+  Authenticate a user
 
   ## Examples
 
-      iex> change_user(user)
-      %Ecto.Changeset{source: %User{}}
+      iex> authenticate_user("example@email.com", "password")
+      {:ok, %User{}}
+
+      iex> authenticate_user("example@email.com", "incorrect_password")
+      {:error, :incorrect_password}
 
   """
   def authenticate_user(email, password) do
     with user <- get_by!(%{email: email}),
-         true <- verify_password(password, user.password_hash),
+         {:ok} <- verify_password(password, user.password_hash),
          do: {:ok, user}
   end
 
   defp verify_password(password, password_hash) do
-    Bcrypt.checkpw(password, password_hash)
+    case Bcrypt.checkpw(password, password_hash) do
+      true ->
+        {:ok}
+      false ->
+        {:error, :incorrect_password}
+    end
   end
 end

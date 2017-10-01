@@ -13,7 +13,7 @@ defmodule AppWeb.SessionController do
 
         conn_authed
         |> render("show.json-api", data: %{jwt: jwt, user: user})
-      false ->
+      {:error, _} ->
         conn
         |> send_resp(401, "")
     end

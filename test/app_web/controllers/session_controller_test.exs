@@ -14,10 +14,20 @@ defmodule AppWeb.SessionControllerTest do
   describe "create session" do
     setup [:create_user]
 
-    test "logs in chosen user", %{conn: conn} do
-      conn = post conn, session_path(conn, :create), email: "some email", password: "password"
+    test "does log in user with valid credentials", %{conn: conn} do
+      conn = post conn, session_path(conn, :create),
+        email: "some email",
+        password: "password"
 
-      json_response(conn, 200)["data"]["attributes"]["jwt"]
+      assert json_response(conn, 200)["data"]["attributes"]["jwt"]
+    end
+
+    test "does not log in user with invalid credentials", %{conn: conn} do
+      conn = post conn, session_path(conn, :create),
+        email: "some email",
+        password: "incorrect_password"
+
+      assert response(conn, 401) == ""
     end
   end
 

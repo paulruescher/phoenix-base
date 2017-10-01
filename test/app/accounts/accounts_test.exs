@@ -69,7 +69,7 @@ defmodule App.AccountsTest do
 
     test "authenticate_user/1 with invalid logins return error" do
       user = user_fixture()
-      assert false == Accounts.authenticate_user(user.email, "wrong_password")
+      assert {:error, :incorrect_password} == Accounts.authenticate_user(user.email, "wrong_password")
     end
   end
 end
