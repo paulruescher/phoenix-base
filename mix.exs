@@ -59,6 +59,7 @@ defmodule App.Mixfile do
 
       # Quality
       {:credo,    "~> 0.8", only: [:dev, :test]},
+      {:inch_ex, "~> 0.5", only: [:dev, :test]},
 
       # Testing
       {:espec,         "~> 1.2", only: :test},
@@ -97,7 +98,8 @@ defmodule App.Mixfile do
       "quality": [
         "test",
         "espec --exclude=context_tag:external_services",
-        "credo --strict"
+        "credo --strict",
+        "inch"
       ]
     ]
   end
