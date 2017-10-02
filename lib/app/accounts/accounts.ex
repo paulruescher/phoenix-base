@@ -44,14 +44,14 @@ defmodule App.Accounts do
 
   ## Examples
 
-      iex> get_by!(email: "existing.user@email.com")
+      iex> get_by(email: "existing.user@email.com")
       %User{}
 
-      iex> get_by!(email: "non.existent.user@email.com")
-      ** (Ecto.NoResultsError)
+      iex> get_by(email: "non.existent.user@email.com")
+      nil
 
   """
-  def get_by!(clause), do: Repo.get_by!(User, clause)
+  def get_by(clause), do: Repo.get_by(User, clause)
 
   @doc """
   Creates a user.
@@ -67,7 +67,7 @@ defmodule App.Accounts do
   """
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.create_changeset(attrs)
+    |> User.password_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -86,6 +86,46 @@ defmodule App.Accounts do
   def update_user(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Updates a users password
+
+  ## Examples
+
+      iex> update_user_password(user, new_valid)
+      {:ok, %User{}}
+
+      iex> update_user_password(user, invalid_value)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_password(%User{} = user, password) do
+    attrs = %{password: password}
+
+    user
+    |> User.password_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Update password reset token
+
+  ## Examples
+
+      iex> update_user_password_reset_token(user, new_valid)
+      {:ok, %User{}}
+
+      iex> update_user_password_reset_token(user, invalid_value)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_password_reset_token(%User{} = user, token) do
+    attrs = Map.put(%{}, "password_reset_token", token)
+
+    user
+    |> User.password_reset_changeset(attrs)
     |> Repo.update()
   end
 
@@ -131,12 +171,12 @@ defmodule App.Accounts do
 
   """
   def authenticate_user(email, password) do
-    with user <- get_by!(%{email: email}),
+    with user <- get_by(%{email: email}),
          {:ok} <- verify_password(password, user.password_hash),
          do: {:ok, user}
   end
 
-  defp verify_password(password, password_hash) do
+  def verify_password(password, password_hash) do
     case Bcrypt.checkpw(password, password_hash) do
       true ->
         {:ok}

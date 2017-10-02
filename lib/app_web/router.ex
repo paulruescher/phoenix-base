@@ -1,6 +1,10 @@
 defmodule AppWeb.Router do
   use AppWeb, :router
 
+  @doc """
+  DEPRECATED
+  Pipeline for HTML requests
+  """
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -9,15 +13,21 @@ defmodule AppWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  @doc """
+  Pipeline for json-api content-type
+  """
   pipeline :api do
     plug JaSerializer.ContentTypeNegotiation
     plug JaSerializer.Deserializer
   end
 
+  @doc """
+  Pipeline for authorizing and loading the current user
+  """
   pipeline :authorized do
     plug Guardian.Plug.Pipeline,
       module: App.Guardian,
-      error_handler: App.AuthErrorHandler
+      error_handler: App.Auth
 
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.EnsureAuthenticated
@@ -34,6 +44,8 @@ defmodule AppWeb.Router do
     pipe_through :api
 
     post "/login", SessionController, :create
+    post "/password/forgot", PasswordController, :create
+    post "/password/reset", PasswordController, :update
 
     scope "/" do
       # pipe_through :authorized

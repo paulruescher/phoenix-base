@@ -6,6 +6,13 @@
 use Mix.Config
 
 # General application configuration
+config :phoenix, :format_encoders,
+  "json-api": Poison
+
+config :mime, :types, %{
+  "application/vnd.api+json" => ["json-api"]
+}
+
 config :app,
   ecto_repos: [App.Repo]
 
@@ -17,16 +24,12 @@ config :app, AppWeb.Endpoint,
   pubsub: [name: App.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
-config :phoenix, :format_encoders,
-  "json-api": Poison
-
-config :mime, :types, %{
-  "application/vnd.api+json" => ["json-api"]
-}
-
 config :app, App.Guardian,
   issuer: "app",
   secret_key: "6v95qhiGFTmGcVPrNIizcrdYSKVeGArt7SSs/CJlL7ejQRKwMBe5nb88RQbZWvdN"
+
+config :app, App.Mailer,
+  adapter: Bamboo.TestAdapter
 
 # Configures Elixir's Logger
 config :logger, :console,

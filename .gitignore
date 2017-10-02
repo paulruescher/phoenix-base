@@ -4,7 +4,9 @@
 /deps
 /*.ez
 
-# Generated on crash by the VM
+*.swp
+
+# Generate`d on crash by the VM
 erl_crash.dump
 
 # Generated on crash by NPM

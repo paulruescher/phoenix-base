@@ -11,6 +11,7 @@ defmodule App.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
+    field :password_reset_token, :string
 
     timestamps()
   end
@@ -27,27 +28,31 @@ defmodule App.Accounts.User do
   """
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:email])
+    |> cast(attrs, [:email, :password_reset_token])
     |> validate_required([:email])
     |> unique_constraint(:email)
   end
 
   @doc """
-  User creation changeset
-
-  ## Examples
-
-      iex> changeset(%User{}, %{email: user@example.com, password: "password"})
-      #Ecto.Changeset<action: nil, changes: %{email: "email@example.com"},
-      errors: [], data: #App.Accounts.User<>, valid?: true>
-
+  Changeset for creating/updating a users password
   """
-  def create_changeset(%User{} = user, attrs) do
+  def password_changeset(%User{} = user, attrs) do
     user
     |> changeset(attrs)
     |> cast(attrs, [:password])
+    |> validate_required([:password])
+    |> validate_length(:password, min: 3)
     |> put_password_hash()
     |> validate_required([:password_hash])
+  end
+
+  @doc """
+  Changeset for updating a users
+  """
+  def password_reset_changeset(%User{} = user, attrs) do
+    user
+    |> cast(attrs, [:password_reset_token])
+    |> validate_required([:password_reset_token])
   end
 
   defp put_password_hash(changeset) do

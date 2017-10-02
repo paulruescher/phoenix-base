@@ -46,7 +46,12 @@ defmodule App.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.13"},
+
+      # App Helpers
       {:ja_serializer, "~> 0.12.0"},
+      {:bamboo, "~> 0.8"},
+
+      # Logging
       {:apex,        "~> 0.7"},
 
       # Auth
@@ -65,7 +70,6 @@ defmodule App.Mixfile do
       {:espec,         "~> 1.2", only: :test},
       {:espec_phoenix, "~> 0.6", only: :test},
       {:espec_phoenix_helpers, "~> 0.3", only: :test},
-
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
       {:ex_machina,  "~> 2.0"},
       {:faker, "~> 0.7"}

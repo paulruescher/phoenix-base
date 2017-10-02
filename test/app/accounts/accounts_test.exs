@@ -1,6 +1,6 @@
 defmodule App.AccountsTest do
   use App.DataCase
-
+  alias Ecto.UUID
   alias App.Accounts
 
   describe "users" do
@@ -62,14 +62,48 @@ defmodule App.AccountsTest do
       assert %Ecto.Changeset{} = Accounts.change_user(user)
     end
 
-    test "authenticate_user/1 with valid logins return user" do
+    test "authenticate_user/1 with valid logins returns user" do
       user = user_fixture()
       assert {:ok, %User{}} = Accounts.authenticate_user(user.email, "password")
     end
 
-    test "authenticate_user/1 with invalid logins return error" do
+    test "authenticate_user/1 with invalid logins returns error" do
       user = user_fixture()
-      assert {:error, :incorrect_password} == Accounts.authenticate_user(user.email, "wrong_password")
+      assert {:error, :incorrect_password} ==
+        Accounts.authenticate_user(user.email, "wrong_password")
+    end
+
+    @tag :must_exec
+    test "update_user_password_reset_token/2 with valid data returns user" do
+      user = user_fixture()
+      token = UUID.generate()
+
+      assert {:ok, %User{} = updated_user} =
+        Accounts.update_user_password_reset_token(user, token)
+      assert updated_user.password_reset_token == token
+    end
+
+    test "update_user_password_reset_token/2 with invalid data returns error" do
+      user = user_fixture()
+
+      assert {:error, changeset} =
+        Accounts.update_user_password_reset_token(user, "")
+      assert changeset.valid? == false
+    end
+
+    test "update_user_password/2 with valid data updates password" do
+      user = user_fixture()
+
+      assert {:ok, user} = Accounts.update_user_password(user, "new_password")
+      assert %User{} = user
+      assert Accounts.verify_password("new_password", user.password_hash)
+    end
+
+    test "update_user_password/2 with invalid data returns error" do
+      user = user_fixture()
+
+      assert {:error, changeset} = Accounts.update_user_password(user, "")
+      assert changeset.valid? == false
     end
   end
 end

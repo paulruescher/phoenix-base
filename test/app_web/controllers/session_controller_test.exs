@@ -27,7 +27,7 @@ defmodule AppWeb.SessionControllerTest do
         email: "some email",
         password: "incorrect_password"
 
-      assert response(conn, 401) == ""
+      assert response(conn, 403) == ""
     end
   end
 

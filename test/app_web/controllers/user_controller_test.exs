@@ -50,7 +50,6 @@ defmodule AppWeb.UserControllerTest do
         "email" => "some updated email"}
     end
 
-    @tag :must_exec
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put conn, user_path(conn, :update, user), user: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
