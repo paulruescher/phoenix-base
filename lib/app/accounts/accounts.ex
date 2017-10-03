@@ -86,8 +86,10 @@ defmodule App.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user, %{password: _} = attrs), do:
+  def update_user(%User{} = user, %{password: _} = attrs) do
+    attrs = Map.put(attrs, :password_reset_token, nil)
     update_user(user, attrs, &User.password_changeset/2)
+  end
 
   @doc """
   Updates a users password reset token.
@@ -104,7 +106,7 @@ defmodule App.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user,  %{password_reset_token: _} = attrs), do:
+  def update_user(%User{} = user, %{password_reset_token: _} = attrs), do:
     update_user(user, attrs, &User.password_reset_changeset/2)
 
   @doc """

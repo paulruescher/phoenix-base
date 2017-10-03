@@ -76,7 +76,6 @@ defmodule App.AccountsTest do
     test "update_user(user, %{password_reset_token: _})/2 with valid data returns user" do
       user = user_fixture()
       token = UUID.generate()
-
       assert {:ok, %User{} = updated_user} =
         Accounts.update_user(user, %{password_reset_token: token})
       assert updated_user.password_reset_token == token
@@ -84,27 +83,34 @@ defmodule App.AccountsTest do
 
     test "update_user(user, %{password_reset_token: _})/2 with invalid data returns error" do
       user = user_fixture()
-
-      assert {:error, changeset} =
-        Accounts.update_user(user, %{password_reset_token: ""})
+      assert {:error, changeset} = Accounts.update_user(user, %{
+        password_reset_token: ""
+      })
       assert changeset.valid? == false
     end
 
     test "update_user(user, %{password: _})/2 with valid data updates password" do
       user = user_fixture()
-
-      assert {:ok, user} =
-        Accounts.update_user(user, %{password: "new_password"})
-      assert %User{} = user
+      assert {:ok, %User{} = user} = Accounts.update_user(user, %{
+        password: "new_password"
+      })
       assert Accounts.verify_password("new_password", user.password_hash)
     end
 
     test "update_user(user, %{password: _})/2 with invalid data returns error" do
       user = user_fixture()
-
-      assert {:error, changeset} =
-        Accounts.update_user(user, %{password: ""})
+      assert {:error, changeset} = Accounts.update_user(user, %{password: ""})
       assert changeset.valid? == false
+    end
+
+    test "update_user(user, %{password: _})/2 resets password_reset_token" do
+      user = user_fixture()
+      token = UUID.generate()
+      {:ok, user} =
+        Accounts.update_user(user, %{password_reset_token: token})
+        |> elem(1)
+        |> Accounts.update_user(%{password: "new_password"})
+      assert user.password_reset_token == nil
     end
   end
 end
