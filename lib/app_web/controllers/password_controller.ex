@@ -10,7 +10,7 @@ defmodule AppWeb.PasswordController do
     case Accounts.get_by(%{email: email}) do
       %User{} = user ->
         {:ok, updated_user} =
-          Accounts.update_user_password_reset_token(user, UUID.generate())
+          Accounts.update_user(user, %{password_reset_token: UUID.generate()})
 
         updated_user
         |> Email.password_reset()
@@ -28,7 +28,7 @@ defmodule AppWeb.PasswordController do
   }) do
     case Accounts.get_by(%{password_reset_token: password_reset_token}) do
       %User{} = user ->
-        case Accounts.update_user_password(user, password) do
+        case Accounts.update_user(user, %{password: password}) do
           {:ok, %User{}} ->
             send_resp(conn, 204, "")
           {:error, _} ->

@@ -72,7 +72,43 @@ defmodule App.Accounts do
   end
 
   @doc """
-  Updates a user.
+  Updates a users password.
+
+  Use this specific function to abstract away the necessity of knowing which
+  changeset to use.
+
+  ## Examples
+
+      iex> update_user(user, :password, new_valid)
+      {:ok, %User{}}
+
+      iex> update_user(user, :password, invalid_value)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user(%User{} = user, %{password: _} = attrs), do:
+    update_user(user, attrs, &User.password_changeset/2)
+
+  @doc """
+  Updates a users password reset token.
+
+  Use this specific function to abstract away the necessity of knowing which
+  changeset to use.
+
+  ## Examples
+
+      iex> update_user(user, %{password_reset_token: new_value})
+      {:ok, %User{}}
+
+      iex> update_user(user, %{password_reset_token: invalid_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user(%User{} = user,  %{password_reset_token: _} = attrs), do:
+    update_user(user, attrs, &User.password_reset_changeset/2)
+
+  @doc """
+  General update user function
 
   ## Examples
 
@@ -83,49 +119,24 @@ defmodule App.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
-  end
+  def update_user(user, attrs), do:
+    update_user(user, attrs, &User.changeset/2)
 
   @doc """
-  Updates a users password
+  Updates a user with a given changeset
 
   ## Examples
 
-      iex> update_user_password(user, new_valid)
+      iex> update_user(user, %{field: new_value}, changeset)
       {:ok, %User{}}
 
-      iex> update_user_password(user, invalid_value)
+      iex> update_user(user, %{field: bad_value}, changeset)
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user_password(%User{} = user, password) do
-    attrs = %{password: password}
-
+  def update_user(user, attrs, changeset) do
     user
-    |> User.password_changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Update password reset token
-
-  ## Examples
-
-      iex> update_user_password_reset_token(user, new_valid)
-      {:ok, %User{}}
-
-      iex> update_user_password_reset_token(user, invalid_value)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_user_password_reset_token(%User{} = user, token) do
-    attrs = Map.put(%{}, "password_reset_token", token)
-
-    user
-    |> User.password_reset_changeset(attrs)
+    |> changeset.(attrs)
     |> Repo.update()
   end
 

@@ -51,6 +51,7 @@ defmodule App.Accounts.User do
   """
   def password_reset_changeset(%User{} = user, attrs) do
     user
+    |> changeset(attrs)
     |> cast(attrs, [:password_reset_token])
     |> validate_required([:password_reset_token])
   end

@@ -73,36 +73,37 @@ defmodule App.AccountsTest do
         Accounts.authenticate_user(user.email, "wrong_password")
     end
 
-    @tag :must_exec
-    test "update_user_password_reset_token/2 with valid data returns user" do
+    test "update_user(user, %{password_reset_token: _})/2 with valid data returns user" do
       user = user_fixture()
       token = UUID.generate()
 
       assert {:ok, %User{} = updated_user} =
-        Accounts.update_user_password_reset_token(user, token)
+        Accounts.update_user(user, %{password_reset_token: token})
       assert updated_user.password_reset_token == token
     end
 
-    test "update_user_password_reset_token/2 with invalid data returns error" do
+    test "update_user(user, %{password_reset_token: _})/2 with invalid data returns error" do
       user = user_fixture()
 
       assert {:error, changeset} =
-        Accounts.update_user_password_reset_token(user, "")
+        Accounts.update_user(user, %{password_reset_token: ""})
       assert changeset.valid? == false
     end
 
-    test "update_user_password/2 with valid data updates password" do
+    test "update_user(user, %{password: _})/2 with valid data updates password" do
       user = user_fixture()
 
-      assert {:ok, user} = Accounts.update_user_password(user, "new_password")
+      assert {:ok, user} =
+        Accounts.update_user(user, %{password: "new_password"})
       assert %User{} = user
       assert Accounts.verify_password("new_password", user.password_hash)
     end
 
-    test "update_user_password/2 with invalid data returns error" do
+    test "update_user(user, %{password: _})/2 with invalid data returns error" do
       user = user_fixture()
 
-      assert {:error, changeset} = Accounts.update_user_password(user, "")
+      assert {:error, changeset} =
+        Accounts.update_user(user, %{password: ""})
       assert changeset.valid? == false
     end
   end
