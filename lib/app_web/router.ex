@@ -48,8 +48,6 @@ defmodule AppWeb.Router do
     post "/password/reset", PasswordController, :update
 
     scope "/" do
-      # pipe_through :authorized
-
       resources "/users", UserController
     end
   end

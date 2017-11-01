@@ -9,7 +9,6 @@ defmodule AppWeb.PasswordControllerTest do
   @create_attrs %{
     email: "email@example.com",
     password: "password",
-    password_reset_token: UUID.generate()
   }
 
   def fixture(:user) do
@@ -23,27 +22,36 @@ defmodule AppWeb.PasswordControllerTest do
     test "send email if user does exist", %{conn: conn, user: user} do
       post conn, password_path(conn, :create),
         email: user.email
+
       assert_delivered_with(subject: "Password Reset")
     end
 
     test "does not send email if user does not exist", %{conn: conn} do
       post conn, password_path(conn, :create),
         email: "non-existent-email@example.com"
+
       assert_no_emails_delivered()
     end
 
     test "update user with new password", %{conn: conn, user: user} do
+      password_reset_token = UUID.generate()
+      Accounts.update_user(user, %{password_reset_token: password_reset_token})
+
       conn = post conn, password_path(conn, :update),
-        password_reset_token: user.password_reset_token,
+        password_reset_token: password_reset_token,
         password: "new password"
+
       assert response(conn, 204) == ""
     end
 
-    # @tag :must_exec
     test "do not update user with invalid password", %{conn: conn, user: user} do
+      password_reset_token = UUID.generate()
+      Accounts.update_user(user, %{password_reset_token: password_reset_token})
+
       conn = post conn, password_path(conn, :update),
-        password_reset_token: user.password_reset_token,
+        password_reset_token: password_reset_token,
         password: ""
+
       assert response(conn, 403) == ""
     end
 
@@ -51,6 +59,7 @@ defmodule AppWeb.PasswordControllerTest do
       conn = post conn, password_path(conn, :update),
         password_reset_token: "",
         password: "new password"
+
       assert response(conn, 403) == ""
     end
   end

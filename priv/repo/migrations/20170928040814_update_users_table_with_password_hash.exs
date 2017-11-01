@@ -1,4 +1,4 @@
-defmodule App.Repo.Migrations.UpdateUsersTable do
+defmodule App.Repo.Migrations.UpdateUsersTableWithPasswordsHash do
   use Ecto.Migration
 
   def change do

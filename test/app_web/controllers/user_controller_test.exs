@@ -5,8 +5,8 @@ defmodule AppWeb.UserControllerTest do
 
   @moduletag :json_api
 
-  @create_attrs %{email: "some email", password: "password"}
-  @update_attrs %{email: "some updated email"}
+  @create_attrs %{email: "email@example.com", password: "password"}
+  @update_attrs %{email: "updated_email@example.com"}
   @invalid_attrs %{email: nil}
 
   def fixture(:user) do
@@ -29,7 +29,7 @@ defmodule AppWeb.UserControllerTest do
       conn = get conn, user_path(conn, :show, id)
       assert json_response(conn, 200)["data"]["id"] == id
       assert json_response(conn, 200)["data"]["attributes"] == %{
-        "email" => "some email"}
+        "email" => "email@example.com"}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -47,7 +47,7 @@ defmodule AppWeb.UserControllerTest do
       conn = get conn, user_path(conn, :show, id)
       assert json_response(conn, 200)["data"]["id"]
       assert json_response(conn, 200)["data"]["attributes"] == %{
-        "email" => "some updated email"}
+        "email" => "updated_email@example.com"}
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do

@@ -19,14 +19,24 @@ config :app,
 # Configures the endpoint
 config :app, AppWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "t3kMCGYnD8oO4mdgJuDJAOv+P3v4kb8VwAx1vEK55mQf1kbhyBVPQpd1L8VEFD5k",
+  secret_key_base: System.get_env("APP_SECRET_KEY"),
   render_errors: [view: AppWeb.ErrorView, accepts: ~w(html json json-api)],
   pubsub: [name: App.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
 config :app, App.Guardian,
   issuer: "app",
-  secret_key: "6v95qhiGFTmGcVPrNIizcrdYSKVeGArt7SSs/CJlL7ejQRKwMBe5nb88RQbZWvdN"
+  secret_key: System.get_env("GUARDIAN_SECRET_KEY")
+
+config :facebook,
+  graph_url: "https://graph.facebook.com/v2.8/",
+  appsecret: System.get_env("FACEBOOK_SECRET"),
+  fields: "first_name,last_name,email,picture.type(large)",
+  scope: "email,user_about_me",
+  # front end
+  appid: System.get_env("FACEBOOK_ID"),
+  redirect_uri: System.get_env("REDIRECT_URI"),
+  oauth_url: "https://www.facebook.com/v2.8/dialog/oauth"
 
 config :app, App.Mailer,
   adapter: Bamboo.TestAdapter

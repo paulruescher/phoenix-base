@@ -12,6 +12,7 @@ defmodule App.Accounts.User do
     field :password, :string, virtual: true
     field :password_hash, :string
     field :password_reset_token, :string
+    field :access_token, :string
 
     timestamps()
   end
@@ -22,28 +23,36 @@ defmodule App.Accounts.User do
   ## Examples
 
       iex> changeset(%User{}, %{email: user@example.com})
-      #Ecto.Changeset<action: nil, changes: %{email: "email@example.com"},
-      errors: [], data: #App.Accounts.User<>, valid?: true>
+      %Ecto.Changeset{}
 
   """
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:email, :password_reset_token])
+    |> cast(attrs, [:email])
     |> validate_required([:email])
+    |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
   end
 
   @doc """
   Changeset for creating/updating a users password
   """
+  def facebook_changeset(%User{} = user, attrs) do
+    user
+    |> changeset(attrs)
+    |> cast(attrs, [:access_token])
+    |> validate_required([:access_token])
+  end
+
   def password_changeset(%User{} = user, attrs) do
     user
     |> changeset(attrs)
     |> cast(attrs, [:password])
     |> validate_required([:password])
-    |> validate_length(:password, min: 3)
+    |> validate_length(:password, min: 5)
     |> put_password_hash()
     |> validate_required([:password_hash])
+    |> put_change(:password_reset_token, nil)
   end
 
   @doc """

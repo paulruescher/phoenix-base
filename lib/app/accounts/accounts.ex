@@ -7,6 +7,7 @@ defmodule App.Accounts do
   alias Comeonin.Bcrypt
   alias App.Repo
   alias App.Accounts.User
+  alias App.Auth.Facebook
 
   @doc """
   Returns the list of users.
@@ -51,21 +52,31 @@ defmodule App.Accounts do
       nil
 
   """
-  def get_by(clause), do: Repo.get_by(User, clause)
+  def get_by(clauses), do: Repo.get_by(User, clauses)
 
   @doc """
   Creates a user.
 
   ## Examples
 
-      iex> create_user(%{field: value})
+      iex> create_user(%{email: email, access_token: access_token})
       {:ok, %User{}}
 
-      iex> create_user(%{field: bad_value})
+      iex> create_user(%{email: email, password: password})
+      {:ok, %User{}}
+
+      iex> create_user(%{})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_user(attrs \\ %{}) do
+  def create_user(attrs \\ %{})
+  def create_user(%{email: _, access_token: _} = attrs) do
+    %User{}
+    |> User.facebook_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_user(attrs) do
     %User{}
     |> User.password_changeset(attrs)
     |> Repo.insert()
@@ -79,7 +90,7 @@ defmodule App.Accounts do
 
   ## Examples
 
-      iex> update_user(user, :password, new_valid)
+      iex> update_user(user, :password, new_value)
       {:ok, %User{}}
 
       iex> update_user(user, :password, invalid_value)
@@ -87,8 +98,9 @@ defmodule App.Accounts do
 
   """
   def update_user(%User{} = user, %{password: _} = attrs) do
-    attrs = Map.put(attrs, :password_reset_token, nil)
-    update_user(user, attrs, &User.password_changeset/2)
+    user
+    |> User.password_changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -106,8 +118,17 @@ defmodule App.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user, %{password_reset_token: _} = attrs), do:
-    update_user(user, attrs, &User.password_reset_changeset/2)
+  def update_user(%User{} = user, %{password_reset_token: _} = attrs) do
+    user
+    |> User.password_reset_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_user(%User{} = user, %{access_token: _} = attrs) do
+    user
+    |> User.facebook_changeset(attrs)
+    |> Repo.update()
+  end
 
   @doc """
   General update user function
@@ -121,8 +142,9 @@ defmodule App.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(user, attrs), do:
+  def update_user(user, attrs) do
     update_user(user, attrs, &User.changeset/2)
+  end
 
   @doc """
   Updates a user with a given changeset
@@ -171,25 +193,56 @@ defmodule App.Accounts do
     User.changeset(user, %{})
   end
 
+  def get_and_update_or_create_user({:ok, %{
+    "email" => email,
+    "access_token" => access_token
+  }}) do
+    case get_by(%{email: email}) do
+      user = %User{} -> update_user(user, %{access_token: access_token})
+
+      _ -> create_user(%{"email": email, "access_token": access_token})
+    end
+  end
+  def get_and_update_or_create_user({:error, opts}), do: {:error, opts}
+
   @doc """
-  Authenticate a user
+  Authenticate a user.
+
+  See https://developers.facebook.com/docs/facebook-login/access-tokens for
+  the proper facebook authentication flow.
 
   ## Examples
 
-      iex> authenticate_user("example@email.com", "password")
+      iex> authenticate_user(%{
+        "provider" => "facebook",
+        "code" => code
+      })
+      {:ok, %User{}}
+
+      iex> authenticate_user(%{
+        "email" => valid_email,
+        "password" => correct_password
+      })
       {:ok, %User{}}
 
       iex> authenticate_user("example@email.com", "incorrect_password")
       {:error, :incorrect_password}
 
   """
-  def authenticate_user(email, password) do
-    with user <- get_by(%{email: email}),
-         {:ok} <- verify_password(password, user.password_hash),
-         do: {:ok, user}
+  def authenticate_user(%{"provider" => "facebook"} = params) do
+    params
+    |> Facebook.get_access_token_by_code
+    |> Facebook.get_email_by_access_token
+    |> get_and_update_or_create_user
   end
 
-  def verify_password(password, password_hash) do
+  def authenticate_user(%{"email" => email, "password" => password}) do
+    with user = %User{} <- get_by(%{email: email}),
+         {:ok} <- verify_password(password, user.password_hash),
+    do: {:ok, user}
+  end
+
+  defp verify_password(password, password_hash) do
     case Bcrypt.checkpw(password, password_hash) do
       true ->
         {:ok}

@@ -71,6 +71,7 @@ defmodule App.Mixfile do
       {:espec_phoenix, "~> 0.6", only: :test},
       {:espec_phoenix_helpers, "~> 0.3", only: :test},
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
+      {:mock, "~> 0.2.0", only: :test},
       {:ex_machina,  "~> 2.0"},
       {:faker, "~> 0.7"}
     ]
@@ -101,9 +102,7 @@ defmodule App.Mixfile do
       ],
       "quality": [
         "test",
-        "espec --exclude=context_tag:external_services",
-        "credo --strict",
-        "inch"
+        "credo --strict"
       ]
     ]
   end
